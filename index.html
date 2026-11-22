@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إطلالة | ITLALA — أزياء تليق بك</title>
+<meta name="description" content="إطلالة — متجر أزياء رجالي وحريمي وأطفال. تشكيلات مميزة، وصل حديثًا، عروض وخصومات، والدفع عند الاستلام.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="config.js"></script>
+</head>
+<body>
+
+<div class="announce" id="announceBar">🚚 شحن لجميع المحافظات — الدفع عند الاستلام — استرجاع مجاني خلال 14 يومًا</div>
+<div class="config-warning" id="configWarning" hidden></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#/" class="logo" data-nav-link="#/">إطلالة <span class="logo-en">ITLALA</span></a>
+    <button class="burger" id="burgerBtn" aria-label="القائمة">☰</button>
+    <nav class="mainnav" id="mainNav">
+      <a href="#/" data-nav-link="#/" data-i18n="nav_home">الرئيسية</a>
+      <a href="#/shop" data-nav-link="#/shop" data-i18n="nav_shop">تسوق الكل</a>
+      <a href="#/men" data-nav-link="#/men" data-i18n="nav_men">رجالي</a>
+      <a href="#/women" data-nav-link="#/women" data-i18n="nav_women">حريمي</a>
+      <a href="#/kids" data-nav-link="#/kids" data-i18n="nav_kids">أطفال</a>
+      <a href="#/shop?on_sale=1" data-nav-link="#/shop?on_sale=1" data-i18n="nav_sale">العروض 🔥</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="searchToggleBtn" aria-label="بحث">🔍</button>
+      <button class="icon-btn" id="langBtn" aria-label="English / عربي">EN</button>
+      <a href="#/wishlist" class="icon-btn" data-nav-link="#/wishlist" aria-label="المفضلة">♥ <span class="badge" id="wishCount" hidden>0</span></a>
+      <a href="#/cart" class="icon-btn" data-nav-link="#/cart" aria-label="السلة">🛒 <span class="badge" id="cartCount">0</span></a>
+      <a href="#/login" class="btn btn-dark btn-sm guest-only" id="loginBtn" data-nav-link="#/login" data-i18n="nav_login">دخول / حساب جديد</a>
+      <span class="user-chip auth-only" id="userChip" hidden></span>
+      <a href="#/admin" class="btn btn-ghost btn-sm admin-only" id="adminLink" data-nav-link="#/admin" hidden>لوحة التحكم</a>
+      <button class="btn btn-ghost btn-sm auth-only" id="logoutBtn" hidden data-i18n="nav_logout">خروج</button>
+    </div>
+  </div>
+  <div class="searchbar" id="searchBar" hidden>
+    <form id="searchForm" class="search-form">
+      <input type="search" id="searchInput" placeholder="ابحث عن منتج… مثال: هودي، فستان، جينز" autocomplete="off">
+      <button type="submit" class="btn btn-dark" data-i18n="search_btn">بحث</button>
+    </form>
+    <div class="suggest" id="searchSuggest"></div>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ============ 1. الرئيسية ============ -->
+  <section class="view" id="view-home">
+    <div class="hero">
+      <div class="hero-text">
+        <p class="hero-kicker">تشكيلة موسم 2026 — وصل حديثًا</p>
+        <h1>أزياء تليق بك</h1>
+        <p class="hero-sub">رجالي • حريمي • أطفال — خامات مختارة بعناية، أسعار واضحة بالجنيه المصري، والدفع عند الاستلام.</p>
+        <div class="hero-cta">
+          <a href="#/shop" class="btn btn-dark btn-lg" data-nav-link="#/shop">تسوّق الآن</a>
+          <a href="#/shop?on_sale=1" class="btn btn-light btn-lg" data-nav-link="#/shop?on_sale=1">اكتشف العروض 🔥</a>
+        </div>
+      </div>
+      <div class="hero-img">
+        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80" alt="إطلالة — تشكيلة أزياء" loading="eager">
+      </div>
+    </div>
+
+    <div class="strip">
+      <div class="strip-item">🚚 <strong>شحن سريع</strong><span>لجميع المحافظات</span></div>
+      <div class="strip-item">💵 <strong>الدفع عند الاستلام</strong><span>من غير دفع مقدم</span></div>
+      <div class="strip-item">↩️ <strong>استرجاع مجاني</strong><span>خلال 14 يومًا</span></div>
+      <div class="strip-item">🛡️ <strong>جودة مضمونة</strong><span>خامات مختارة بعناية</span></div>
+    </div>
+
+    <h2 class="section-title">تسوّق حسب التشكيلة</h2>
+    <div class="cats-grid">
+      <a href="#/men" class="cat-card" data-nav-link="#/men"><img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=80" alt="رجالي" loading="lazy"><span>رجالي</span></a>
+      <a href="#/women" class="cat-card" data-nav-link="#/women"><img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80" alt="حريمي" loading="lazy"><span>حريمي</span></a>
+      <a href="#/kids" class="cat-card" data-nav-link="#/kids"><img src="https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&w=800&q=80" alt="أطفال" loading="lazy"><span>أطفال</span></a>
+      <a href="#/shop?on_sale=1" class="cat-card" data-nav-link="#/shop?on_sale=1"><img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=800&q=80" alt="العروض" loading="lazy"><span>العروض 🔥</span></a>
+    </div>
+
+    <h2 class="section-title">وصل حديثًا <a href="#/shop?is_new=1" class="see-all" data-nav-link="#/shop?is_new=1">عرض الكل ←</a></h2>
+    <div id="homeNew" class="products-grid"><p class="muted">جاري تحميل المنتجات…</p></div>
+
+    <h2 class="section-title">الأكثر مبيعًا <a href="#/shop?is_best_seller=1" class="see-all" data-nav-link="#/shop?is_best_seller=1">عرض الكل ←</a></h2>
+    <div id="homeBest" class="products-grid"><p class="muted">جاري تحميل المنتجات…</p></div>
+
+    <h2 class="section-title">ترند الآن <a href="#/shop?is_trending=1" class="see-all" data-nav-link="#/shop?is_trending=1">عرض الكل ←</a></h2>
+    <div id="homeTrending" class="products-grid"><p class="muted">جاري تحميل المنتجات…</p></div>
+
+    <div class="sale-banner">
+      <div>
+        <h2>خصومات حتى 40% 🔥</h2>
+        <p>على تشكيلة مختارة من الأزياء — لفترة محدودة.</p>
+      </div>
+      <a href="#/shop?on_sale=1" class="btn btn-light btn-lg" data-nav-link="#/shop?on_sale=1">تسوّق العروض</a>
+    </div>
+    <div id="homeSale" class="products-grid"><p class="muted">جاري تحميل العروض…</p></div>
+
+    <h2 class="section-title">قالوا عن إطلالة</h2>
+    <div class="reviews-strip">
+      <blockquote>«الخامة ممتازة والمقاسات مظبوطة، والتوصيل وصل بسرعة.»<footer>— سارة م.، القاهرة ★★★★★</footer></blockquote>
+      <blockquote>«أفضل تجربة تسوق أونلاين جربتها، الدفع عند الاستلام ريحني جدًا.»<footer>— أحمد ع.، الجيزة ★★★★★</footer></blockquote>
+      <blockquote>«الفساتين أحلى من الصور، وهطلب تاني أكيد.»<footer>— منى خ.، الإسكندرية ★★★★☆</footer></blockquote>
+    </div>
+
+    <div class="newsletter">
+      <h2>اشترك في نشرتنا البريدية ✉️</h2>
+      <p>خصومات وعروض حصرية توصلك أول بأول.</p>
+      <form id="newsletterForm" class="newsletter-form">
+        <input type="email" id="newsletterEmail" required placeholder="بريدك الإلكتروني" dir="ltr">
+        <button type="submit" class="btn btn-dark">اشترك</button>
+      </form>
+      <p class="form-msg" id="newsletterMsg" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- ============ 2. تسوق الكل ============ -->
+  <section class="view" id="view-shop" hidden>
+    <h2 class="page-title" data-i18n="shop_title">تسوّق الكل</h2>
+    <p class="muted">كل منتجات إطلالة — استخدم الفلاتر والترتيب عشان توصل للي يناسبك.</p>
+    <div id="shopContent"><p class="muted">جاري تحميل المنتجات…</p></div>
+  </section>
+
+  <!-- ============ 3. صفحة قسم (رجالي/حريمي/أطفال/قسم فرعي) ============ -->
+  <section class="view" id="view-category" hidden>
+    <h2 class="page-title" id="categoryTitle">القسم</h2>
+    <div id="categoryContent"><p class="muted">جاري تحميل المنتجات…</p></div>
+  </section>
+
+  <!-- ============ 4. صفحة المنتج ============ -->
+  <section class="view" id="view-product" hidden>
+    <div id="productContent"><p class="muted">جاري تحميل المنتج…</p></div>
+  </section>
+
+  <!-- ============ 5. السلة ============ -->
+  <section class="view" id="view-cart" hidden>
+    <h2 class="page-title" data-i18n="cart_title">سلة التسوق 🛒</h2>
+    <div id="cartContent"><p class="muted">جاري تحميل السلة…</p></div>
+  </section>
+
+  <!-- ============ 6. إتمام الشراء ============ -->
+  <section class="view" id="view-checkout" hidden>
+    <h2 class="page-title" data-i18n="checkout_title">إتمام الشراء</h2>
+    <div id="checkoutContent"><p class="muted">جاري تحميل بيانات الطلب…</p></div>
+  </section>
+
+  <!-- ============ 7. تسجيل الدخول ============ -->
+  <section class="view" id="view-login" hidden>
+    <div class="auth-card">
+      <h2 data-i18n="login_title">تسجيل الدخول</h2>
+      <p class="muted">ادخل بحسابك عشان تكمل طلبك وتتابع طلباتك.</p>
+      <form id="loginForm" class="auth-form">
+        <label><span data-i18n="f_email">الإيميل</span>
+          <input type="email" id="loginEmail" required placeholder="example@mail.com" dir="ltr" autocomplete="email">
+        </label>
+        <label><span data-i18n="f_password">كلمة السر</span>
+          <input type="password" id="loginPassword" required placeholder="كلمة السر" autocomplete="current-password">
+        </label>
+        <button class="btn btn-dark btn-block" type="submit" data-i18n="login_btn">دخول</button>
+      </form>
+      <p class="form-msg" id="loginMsg" role="alert"></p>
+      <p class="auth-links"><a href="#/forgot" data-nav-link="#/forgot">نسيت كلمة السر؟</a> • <a href="#/register" data-nav-link="#/register">اعمل حساب جديد</a></p>
+    </div>
+  </section>
+
+  <!-- ============ 8. حساب جديد ============ -->
+  <section class="view" id="view-register" hidden>
+    <div class="auth-card">
+      <h2 data-i18n="register_title">حساب جديد</h2>
+      <p class="muted">سجّل في إطلالة — أول حساب بيتسجّل على المتجر بيبقى حساب الأدمن (صاحب المتجر).</p>
+      <form id="registerForm" class="auth-form">
+        <label><span data-i18n="f_name">الاسم الكامل</span>
+          <input type="text" id="regName" required minlength="2" placeholder="اسمك الكامل">
+        </label>
+        <label><span data-i18n="f_email">الإيميل</span>
+          <input type="email" id="regEmail" required placeholder="example@mail.com" dir="ltr" autocomplete="email">
+        </label>
+        <label><span data-i18n="f_phone">رقم الموبايل (اختياري)</span>
+          <input type="tel" id="regPhone" placeholder="01xxxxxxxxx" dir="ltr">
+        </label>
+        <label><span data-i18n="f_password">كلمة السر</span>
+          <input type="password" id="regPassword" required minlength="6" placeholder="6 أحرف على الأقل" autocomplete="new-password">
+        </label>
+        <button class="btn btn-dark btn-block" type="submit" data-i18n="register_btn">اعمل حساب</button>
+      </form>
+      <p class="form-msg" id="registerMsg" role="alert"></p>
+      <p class="auth-links">عندك حساب؟ <a href="#/login" data-nav-link="#/login">سجّل دخول</a></p>
+    </div>
+  </section>
+
+  <!-- ============ 9. استعادة كلمة السر ============ -->
+  <section class="view" id="view-forgot" hidden>
+    <div class="auth-card">
+      <h2 data-i18n="forgot_title">استعادة كلمة السر</h2>
+      <p class="muted">اكتب إيميلك وهنبعت لك رابط لإعادة تعيين كلمة السر.</p>
+      <form id="forgotForm" class="auth-form">
+        <label><span data-i18n="f_email">الإيميل</span>
+          <input type="email" id="forgotEmail" required placeholder="example@mail.com" dir="ltr" autocomplete="email">
+        </label>
+        <button class="btn btn-dark btn-block" type="submit" data-i18n="forgot_btn">ابعت رابط الاستعادة</button>
+      </form>
+      <p class="form-msg" id="forgotMsg" role="alert"></p>
+      <p class="auth-links"><a href="#/login" data-nav-link="#/login">رجوع لتسجيل الدخول</a></p>
+    </div>
+  </section>
+
+  <!-- ============ 10. البروفايل ============ -->
+  <section class="view" id="view-profile" hidden>
+    <h2 class="page-title" data-i18n="profile_title">حسابي</h2>
+    <div class="account-nav">
+      <a href="#/profile" class="active" data-nav-link="#/profile">البروفايل</a>
+      <a href="#/addresses" data-nav-link="#/addresses">عناويني</a>
+      <a href="#/orders" data-nav-link="#/orders">طلباتي</a>
+      <a href="#/wishlist" data-nav-link="#/wishlist">المفضلة</a>
+    </div>
+    <div id="profileContent"><p class="muted">جاري تحميل بيانات حسابك…</p></div>
+  </section>
+
+  <!-- ============ 11. العناوين ============ -->
+  <section class="view" id="view-addresses" hidden>
+    <h2 class="page-title" data-i18n="addresses_title">عناويني</h2>
+    <div class="account-nav">
+      <a href="#/profile" data-nav-link="#/profile">البروفايل</a>
+      <a href="#/addresses" class="active" data-nav-link="#/addresses">عناويني</a>
+      <a href="#/orders" data-nav-link="#/orders">طلباتي</a>
+      <a href="#/wishlist" data-nav-link="#/wishlist">المفضلة</a>
+    </div>
+    <div id="addressesContent"><p class="muted">جاري تحميل عناوينك…</p></div>
+  </section>
+
+  <!-- ============ 12. طلباتي ============ -->
+  <section class="view" id="view-orders" hidden>
+    <h2 class="page-title" data-i18n="orders_title">طلباتي</h2>
+    <div class="account-nav">
+      <a href="#/profile" data-nav-link="#/profile">البروفايل</a>
+      <a href="#/addresses" data-nav-link="#/addresses">عناويني</a>
+      <a href="#/orders" class="active" data-nav-link="#/orders">طلباتي</a>
+      <a href="#/wishlist" data-nav-link="#/wishlist">المفضلة</a>
+    </div>
+    <div id="ordersContent"><p class="muted">جاري تحميل طلباتك…</p></div>
+  </section>
+
+  <!-- ============ 13. تتبع الطلب ============ -->
+  <section class="view" id="view-order-tracking" hidden>
+    <h2 class="page-title" data-i18n="track_title">تتبع الطلب 📦</h2>
+    <p class="muted">اكتب رقم الطلب والإيميل المستخدم في الطلب لعرض حالته — من غير ما تحتاج تسجيل دخول.</p>
+    <div id="orderTrackingContent"><p class="muted">جاري التحميل…</p></div>
+  </section>
+
+  <!-- ============ 14. المفضلة ============ -->
+  <section class="view" id="view-wishlist" hidden>
+    <h2 class="page-title" data-i18n="wishlist_title">المفضلة ♥</h2>
+    <div id="wishlistContent"><p class="muted">جاري تحميل المفضلة…</p></div>
+  </section>
+
+  <!-- ============ 15. نتائج البحث ============ -->
+  <section class="view" id="view-search" hidden>
+    <h2 class="page-title" id="searchTitle">نتائج البحث</h2>
+    <div id="searchContent"><p class="muted">جاري البحث…</p></div>
+  </section>
+
+  <!-- ============ 16. من نحن ============ -->
+  <section class="view" id="view-about" hidden>
+    <h2 class="page-title" data-i18n="about_title">من نحن</h2>
+    <div class="prose">
+      <p><strong>إطلالة | ITLALA</strong> — متجر أزياء مصري بروح عصرية. هدفنا بسيط: ملابس بجودة حقيقية، مقاسات مظبوطة، وأسعار واضحة بالجنيه المصري من غير مفاجآت.</p>
+      <p>بنختار خاماتنا بعناية، وبنراجع كل قطعة قبل ما توصلك. عندنا تشكيلات رجالي وحريمي وأطفال، مع وصل حديثًا وعروض موسمية على طول السنة.</p>
+      <p>شعارنا: <strong>«أزياء تليق بك»</strong> — لأن الأناقة مش رفاهية، دي حقك كل يوم.</p>
+      <h3>ليه تختار إطلالة؟</h3>
+      <ul>
+        <li>جودة مختارة بعناية ومراجعة قبل الشحن.</li>
+        <li>الدفع عند الاستلام — من غير دفع مقدم.</li>
+        <li>استرجاع واستبدال مجاني خلال 14 يومًا.</li>
+        <li>شحن سريع لجميع محافظات مصر.</li>
+        <li>دعم عملاء بيتابع معاك لحد ما طلبك يوصلك.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 17. تواصل معنا ============ -->
+  <section class="view" id="view-contact" hidden>
+    <h2 class="page-title" data-i18n="contact_title">تواصل معنا</h2>
+    <div class="prose">
+      <p>فريق دعم إطلالة موجود لمساعدتك — للاستفسار عن طلب، مقاس، أو استرجاع.</p>
+      <p><strong>الإيميل:</strong> <span id="contactEmail" dir="ltr">support@itlala.store</span><br>
+      <strong>التليفون:</strong> <span id="contactPhone" dir="ltr">01000000000</span><br>
+      <strong>مواعيد العمل:</strong> يوميًا من 10 صباحًا حتى 10 مساءً.</p>
+    </div>
+    <form id="contactForm" class="card form-card">
+      <label>الاسم <input type="text" id="contactName" required placeholder="اسمك"></label>
+      <label>الإيميل <input type="email" id="contactEmailInput" required placeholder="example@mail.com" dir="ltr"></label>
+      <label>رقم الموبايل (اختياري) <input type="tel" id="contactPhoneInput" placeholder="01xxxxxxxxx" dir="ltr"></label>
+      <label>الموضوع (اختياري) <input type="text" id="contactSubjectInput" placeholder="مثال: استفسار عن طلب"></label>
+      <label>رسالتك <textarea id="contactMessage" rows="4" required placeholder="اكتب رسالتك هنا…"></textarea></label>
+      <button class="btn btn-dark" type="submit">ابعت الرسالة</button>
+      <p class="form-msg" id="contactMsg" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- ============ 18. الأسئلة الشائعة ============ -->
+  <section class="view" id="view-faq" hidden>
+    <h2 class="page-title" data-i18n="faq_title">الأسئلة الشائعة</h2>
+    <div class="faq-list">
+      <details open><summary>هل الدفع عند الاستلام متاح؟</summary><p>أيوه — الدفع عند الاستلام هو طريقة الدفع الأساسية في إطلالة. بتدفع كاش لما طلبك يوصلك.</p></details>
+      <details><summary>الشحن بياخد قد إيه؟</summary><p>القاهرة والجيزة: 1–2 يوم عمل. باقي المحافظات: 2–4 أيام عمل. رسوم الشحن بتظهر قبل تأكيد الطلب، والشحن مجاني للطلبات فوق حد معين حسب إعدادات المتجر.</p></details>
+      <details><summary>أقدر أسترجع أو أبدّل منتج؟</summary><p>أيوه، خلال 14 يومًا من الاستلام بشرط تكون القطعة بحالتها الأصلية ومعاها التكت. راجع صفحة سياسة الاسترجاع للتفاصيل.</p></details>
+      <details><summary>إزاي أعرف مقاسي؟</summary><p>في صفحة كل منتج هتلاقي دليل مقاسات، ولو محتار بين مقاسين اختار الأكبر أو كلمنا وهنساعدك.</p></details>
+      <details><summary>هل لازم أعمل حساب عشان أطلب؟</summary><p>لا — تقدر تطلب كضيف من صفحة إتمام الشراء. بس الحساب بيسهّل عليك تتبع طلباتك وحفظ عناوينك والمفضلة.</p></details>
+      <details><summary>إزاي أتتبع طلبي؟</summary><p>من صفحة «تتبع الطلب» برقم الطلب (مثال: ITL-1001) والإيميل اللي طلبت بيه، أو من «طلباتي» لو مسجّل دخول.</p></details>
+    </div>
+  </section>
+
+  <!-- ============ 19. سياسة الشحن ============ -->
+  <section class="view" id="view-shipping" hidden>
+    <h2 class="page-title" data-i18n="shipping_title">سياسة الشحن</h2>
+    <div class="prose">
+      <p>بنشحن لجميع محافظات مصر عن طريق شركات شحن موثوقة.</p>
+      <ul>
+        <li>القاهرة والجيزة: التوصيل خلال 1–2 يوم عمل.</li>
+        <li>باقي المحافظات: التوصيل خلال 2–4 أيام عمل.</li>
+        <li>رسوم الشحن: حسب المحافظة وتظهر قبل تأكيد الطلب في صفحة إتمام الشراء.</li>
+        <li>الشحن مجاني للطلبات اللي توصل لحد الشحن المجاني المحدد في إعدادات المتجر.</li>
+        <li>تقدر تتتبع طلبك برقم الطلب من صفحة «تتبع الطلب».</li>
+        <li>لو الطلب اتأخر عن المدة المتوقعة، كلمنا وهنتصرف فورًا.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 20. الاسترجاع والاستبدال ============ -->
+  <section class="view" id="view-returns" hidden>
+    <h2 class="page-title" data-i18n="returns_title">سياسة الاسترجاع والاستبدال</h2>
+    <div class="prose">
+      <ul>
+        <li>تقدر تسترجع أو تستبدل أي منتج خلال <strong>14 يومًا</strong> من تاريخ الاستلام.</li>
+        <li>لازم تكون القطعة بحالتها الأصلية: غير مستعملة، مغسولة لأ، ومعاها التكت والعبوة.</li>
+        <li>الاسترجاع مجاني — بنبعت مندوب يستلم القطعة من عندك.</li>
+        <li>المبلغ المسترجع بيرجع لك بنفس طريقة الدفع خلال 3–5 أيام عمل بعد استلام القطعة وفحصها.</li>
+        <li>لو القطعة وصلتك فيها عيب مصنع أو غلط في المقاس/اللون، الاستبدال فوري على حسابنا.</li>
+        <li>المنتجات المخفضة في العروض قابلة للاستبدال بنفس الشروط، والاسترجاع حسب حالة القطعة.</li>
+        <li>لطلب استرجاع: تواصل معنا من صفحة «تواصل معنا» برقم الطلب.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 21. سياسة الخصوصية ============ -->
+  <section class="view" id="view-privacy" hidden>
+    <h2 class="page-title" data-i18n="privacy_title">سياسة الخصوصية</h2>
+    <div class="prose">
+      <p>في إطلالة بنحترم خصوصيتك. البيانات اللي بنجمعها (الاسم، الإيميل، التليفون، العنوان) بنستخدمها بس عشان نجهّز طلبك ونوصّله لك ونتواصل معاك بخصوصه.</p>
+      <ul>
+        <li>مبنبيعش ولا بنشارك بياناتك مع أي طرف تالت لأغراض تسويقية.</li>
+        <li>بيانات الدفع عند الاستلام بتتم كاش وقت التوصيل — مبنخزنش أي بيانات بطاقات.</li>
+        <li>تقدر تطلب تعديل أو حذف بياناتك في أي وقت من صفحة حسابك أو بالتواصل معنا.</li>
+        <li>النشرة البريدية اختيارية، وتقدر تلغي اشتراكك منها في أي وقت.</li>
+        <li>بنستخدم ملفات تعريف الارتباط (cookies) وتخزين المتصفح المحلي لحفظ السلة والمفضلة وتفضيلات اللغة بس.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 22. الشروط والأحكام ============ -->
+  <section class="view" id="view-terms" hidden>
+    <h2 class="page-title" data-i18n="terms_title">الشروط والأحكام</h2>
+    <div class="prose">
+      <ul>
+        <li>باستخدامك متجر إطلالة فأنت توافق على هذه الشروط.</li>
+        <li>الأسعار بالجنيه المصري وتشمل ضريبة القيمة المضافة حيثما ينطبق، وقد تتغير العروض من غير إشعار مسبق.</li>
+        <li>التوفر حسب المخزون؛ لو قطعة نفدت بعد طلبك هنبلغك فورًا ونعرض عليك بديل أو استرجاع كامل.</li>
+        <li>الطلبات تُؤكَّد بعد مراجعتها، ويحق للمتجر إلغاء طلب في حالات استثنائية (مثال: خطأ في السعر أو نفاد المخزون) مع إبلاغ العميل.</li>
+        <li>الدفع عند الاستلام هو طريقة الدفع المتاحة حاليًا.</li>
+        <li>الصور توضيحية وقد تختلف الألوان قليلًا حسب شاشة جهازك.</li>
+        <li>أي نزاع يخضع للقوانين المصرية المعمول بها.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 23. لوحة تحكم الأدمن ============ -->
+  <section class="view" id="view-admin" hidden>
+    <h2 class="page-title" data-i18n="admin_title">لوحة تحكم الأدمن 🛠️</h2>
+    <p class="muted">دي لوحة صاحب المتجر — إدارة المنتجات والطلبات والعملاء والكوبونات والمراجعات والإعدادات.</p>
+    <div class="admin-tabs" id="adminTabs">
+      <button data-admin-tab="overview" class="active">نظرة عامة</button>
+      <button data-admin-tab="products">المنتجات</button>
+      <button data-admin-tab="orders">الطلبات</button>
+      <button data-admin-tab="customers">العملاء</button>
+      <button data-admin-tab="coupons">الكوبونات</button>
+      <button data-admin-tab="reviews">المراجعات</button>
+      <button data-admin-tab="settings">بانرات / إعدادات</button>
+    </div>
+    <div id="adminContent"><p class="muted">جاري تحميل لوحة التحكم…</p></div>
+    <p class="form-msg" id="adminMsg" role="alert"></p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h3>إطلالة <span class="logo-en">ITLALA</span></h3>
+      <p class="muted">أزياء تليق بك — رجالي، حريمي، وأطفال. جودة مختارة بعناية وأسعار واضحة بالجنيه المصري.</p>
+    </div>
+    <div class="footer-col">
+      <h4>تسوّق</h4>
+      <a href="#/shop" data-nav-link="#/shop">تسوق الكل</a>
+      <a href="#/men" data-nav-link="#/men">رجالي</a>
+      <a href="#/women" data-nav-link="#/women">حريمي</a>
+      <a href="#/kids" data-nav-link="#/kids">أطفال</a>
+      <a href="#/shop?on_sale=1" data-nav-link="#/shop?on_sale=1">العروض</a>
+    </div>
+    <div class="footer-col">
+      <h4>حسابي</h4>
+      <a href="#/login" data-nav-link="#/login">تسجيل الدخول</a>
+      <a href="#/register" data-nav-link="#/register">حساب جديد</a>
+      <a href="#/orders" data-nav-link="#/orders">طلباتي</a>
+      <a href="#/wishlist" data-nav-link="#/wishlist">المفضلة</a>
+      <a href="#/order-tracking" data-nav-link="#/order-tracking">تتبع الطلب</a>
+    </div>
+    <div class="footer-col">
+      <h4>مساعدة</h4>
+      <a href="#/about" data-nav-link="#/about">من نحن</a>
+      <a href="#/contact" data-nav-link="#/contact">تواصل معنا</a>
+      <a href="#/faq" data-nav-link="#/faq">الأسئلة الشائعة</a>
+      <a href="#/shipping" data-nav-link="#/shipping">سياسة الشحن</a>
+      <a href="#/returns" data-nav-link="#/returns">الاسترجاع والاستبدال</a>
+      <a href="#/privacy" data-nav-link="#/privacy">سياسة الخصوصية</a>
+      <a href="#/terms" data-nav-link="#/terms">الشروط والأحكام</a>
+    </div>
+  </div>
+  <p class="footer-bottom">© 2026 إطلالة | ITLALA — جميع الحقوق محفوظة. الدفع عند الاستلام 💵</p>
+</footer>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
