@@ -625,7 +625,7 @@ function bindCards(root) {
 
 /* ---------- الروتنج ---------- */
 var VIEWS = ["home", "shop", "category", "product", "cart", "checkout", "login", "register",
-  "forgot", "profile", "addresses", "orders", "order-tracking", "wishlist", "search",
+  "forgot", "profile", "addresses", "orders", "order-tracking", "order-details", "wishlist", "search",
   "about", "contact", "faq", "shipping", "returns", "privacy", "terms", "admin"];
 function parseHash() {
   var h = (location.hash || "#/").replace(/^#/, "");
@@ -679,7 +679,7 @@ async function renderRoute() {
   if (first === "profile") { if (needAuth()) return; showView("profile"); renderProfile(); return; }
   if (first === "addresses") { if (needAuth()) return; showView("addresses"); renderAddresses(); return; }
   if (first === "orders") { if (needAuth()) return; showView("orders"); renderOrders(); return; }
-  if (first === "order" && segs[1]) { showView("order-tracking"); renderTracking(segs[1]); return; }
+  if (first === "order" && segs[1]) { if (state.user) { showView("order-details"); renderOrderDetails(segs[1]); return; } showView("order-tracking"); renderTracking(segs[1]); return; }
   if (first === "order-tracking") { showView("order-tracking"); renderTracking(null); return; }
   if (first === "wishlist") { showView("wishlist"); renderWishlist(); return; }
   if (first === "search") { showView("search"); renderSearch(r.query.q || ""); return; }
@@ -1391,6 +1391,73 @@ function trackStepsHTML(status) {
     return '<div class="track-step' + (i <= ix ? " done" : "") + '">' + esc(orderStatusLabel(s)) + "</div>";
   }).join("") + "</div>" + (status === "cancelled" ? '<p class="form-msg error">' + esc(t("status_cancelled")) + "</p>" : "");
 }
+async function renderOrderDetails(number) {
+  var box = $("orderDetailsContent");
+  var isAdmin = !!(state.user && state.user.role === "admin");
+  box.innerHTML = '<p class="muted">' + esc(t("loading")) + "</p>";
+  var o;
+  try {
+    var d = await api("get-order", { order_number: number });
+    o = d.order || d;
+  } catch (e) {
+    box.innerHTML = '<p class="empty">' + esc(e.message || t("err_load")) + "</p>" +
+      '<p style="text-align:center"><a href="#/' + (isAdmin ? "admin" : "orders") + '" class="btn btn-dark">' + esc(isAdmin ? t("orders") : t("back_to_orders")) + "</a></p>";
+    return;
+  }
+  var a = o.address || o.address_snapshot || {};
+  if (typeof a === "string") { try { a = JSON.parse(a); } catch (e2) { a = {}; } }
+  var items = o.items || [];
+  var phone = (a.phone || "").toString().trim();
+  var telHref = phone.replace(/[^+0-9]/g, "");
+  var addrLines = [a.full_name, a.address_line, a.city, a.country].filter(function (x) { return (x || "").toString().trim() !== ""; });
+  var h = '<div class="card"><h3 dir="ltr">' + esc(o.order_number || number) + "</h3>" +
+    trackStepsHTML(o.status) +
+    '<p><strong>' + esc(t("order_date")) + ':</strong> ' + esc(fmtDate(o.created_at)) + "<br>" +
+    "<strong>" + esc(t("payment_method")) + ":</strong> " + esc(o.payment_method === "cod" ? t("cod") : (o.payment_method || "")) + " — " + esc(o.payment_status === "paid" ? t("pay_paid") : t("pay_pending")) + "<br>" +
+    "<strong>" + esc(t("payment_status")) + ":</strong> " + esc(o.payment_status === "paid" ? t("pay_paid") : t("pay_pending")) + "</p>" +
+    '<h4>' + esc(t("customer_info")) + "</h4><p>" +
+    "<strong>" + esc(t("full_name")) + ":</strong> " + esc(o.customer_name || a.full_name || "—") + "<br>" +
+    "<strong>" + esc(t("email")) + ":</strong> " + ((o.customer_email || a.email) ? '<a href="mailto:' + esc(o.customer_email || a.email) + '" dir="ltr">' + esc(o.customer_email || a.email) + "</a>" : "—") + "<br>" +
+    "<strong>" + esc(t("phone")) + ":</strong> " + (phone && telHref ? '<a href="tel:' + esc(telHref) + '" dir="ltr">' + esc(phone) + "</a>" : esc(phone || "—")) + "</p>" +
+    '<h4>' + esc(t("order_address")) + "</h4><p>" + (addrLines.length ? esc(addrLines.join("، ")) : "—") + (phone ? "<br>" + esc(t("phone")) + ": " + esc(phone) : "") + "</p>" +
+    (items.length ? "<h4>" + esc(t("order_items")) + "</h4>" + items.map(function (it) {
+      return '<div class="summary-row"><span>' + esc(it.product_name_ar || it.product_name_en || "") + " × " + Number(it.qty || 0) +
+        (it.size ? " (" + esc(it.size) + ")" : "") + (it.color_name_ar ? " — " + esc(it.color_name_ar) : "") + "</span><strong>" + esc(fmtPrice(Number(it.price_egp || 0) * Number(it.qty || 0))) + "</strong></div>";
+    }).join("") : "") +
+    '<h4>' + esc(t("order_summary")) + "</h4>" +
+    '<div class="summary-row"><span>' + esc(t("subtotal")) + "</span><strong>" + esc(fmtPrice(Number(o.subtotal_egp || 0))) + "</strong></div>" +
+    (Number(o.discount_egp || 0) ? '<div class="summary-row"><span>' + esc(t("discount")) + (o.coupon_code ? " (" + esc(o.coupon_code) + ")" : "") + "</span><strong>−" + esc(fmtPrice(Number(o.discount_egp || 0))) + "</strong></div>" : "") +
+    '<div class="summary-row"><span>' + esc(t("shipping")) + "</span><strong>" + (Number(o.shipping_egp || 0) === 0 ? esc(t("free")) : esc(fmtPrice(Number(o.shipping_egp || 0)))) + "</strong></div>" +
+    '<div class="summary-row total"><span>' + esc(t("total")) + "</span><strong>" + esc(fmtPrice(Number(o.total_egp || 0))) + "</strong></div>" +
+    "</div>";
+  if (isAdmin) {
+    h += '<div class="card" style="margin-top:1rem"><h4>' + esc(t("update_status")) + "</h4>" +
+      '<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center"><select id="ordDetStatus">' +
+      ["pending", "confirmed", "shipped", "delivered", "cancelled"].map(function (s) {
+        return '<option value="' + s + '"' + (o.status === s ? " selected" : "") + ">" + esc(orderStatusLabel(s)) + "</option>";
+      }).join("") + "</select>" +
+      '<button class="btn btn-dark" id="ordDetUpdate">' + esc(t("update_status")) + "</button></div>" +
+      '<p class="form-msg" id="ordDetMsg" role="alert"></p></div>';
+  }
+  if (!isAdmin && (o.status === "pending" || o.status === "confirmed") && o.id) {
+    h += '<p style="margin-top:1rem"><button class="btn btn-danger" id="ordDetCancel">' + esc(t("cancel_order")) + "</button></p>";
+  }
+  h += '<p style="margin-top:1rem"><a href="#/' + (isAdmin ? "admin" : "orders") + '" class="btn btn-ghost">' + esc(isAdmin ? t("orders") : t("back_to_orders")) + "</a></p>";
+  box.innerHTML = h;
+  var ub = $("ordDetUpdate");
+  if (ub) ub.addEventListener("click", async function () {
+    ub.disabled = true; setMsg($("ordDetMsg"), t("loading"));
+    try { await api("admin-order-update", { id: o.id, status: $("ordDetStatus").value }); setMsg($("ordDetMsg"), t("profile_saved"), "ok"); renderOrderDetails(number); }
+    catch (err) { setMsg($("ordDetMsg"), err.message || t("err_generic"), "error"); }
+    finally { ub.disabled = false; }
+  });
+  var cb = $("ordDetCancel");
+  if (cb) cb.addEventListener("click", async function () {
+    if (!confirm(t("confirm_cancel"))) return;
+    try { await api("cancel-order", { order_id: o.id }); toast(t("order_cancelled")); renderOrderDetails(number); }
+    catch (err) { toast(err.message || t("err_generic")); }
+  });
+}
 async function renderTracking(number) {
   var box = $("orderTrackingContent");
   var preNum = number || (state.lastOrder ? state.lastOrder.order_number : "");
@@ -1592,14 +1659,22 @@ async function renderAdminOrders(box) {
       var d = await api("admin-orders-list", params);
       var list = d.items || d.orders || d || [];
       $("ordList").innerHTML = list.length ? list.map(function (o) {
-        return '<div class="order-card"><div><strong dir="ltr">' + esc(o.order_number) + "</strong> • " + esc(o.customer_name || o.user_name || o.email || "") +
+        return '<div class="order-card" data-ord-open="' + esc(o.order_number) + '" style="cursor:pointer"><div><strong dir="ltr">' + esc(o.order_number) + "</strong> • " + esc(o.customer_name || o.user_name || o.email || "") +
           "<br>" + esc(fmtDate(o.created_at)) + " • " + esc(fmtPrice(o.total_egp)) + ' <span class="status ' + esc(o.status) + '">' + esc(orderStatusLabel(o.status)) + "</span></div>" +
           '<div><select data-ord-status="' + esc(o.id) + '">' +
           ["pending", "confirmed", "shipped", "delivered", "cancelled"].map(function (s) {
             return '<option value="' + s + '"' + (o.status === s ? " selected" : "") + ">" + esc(orderStatusLabel(s)) + "</option>";
           }).join("") + "</select> " +
+          '<a href="#/order/' + esc(o.order_number) + '" class="btn btn-ghost btn-sm">' + esc(t("view_order")) + "</a> " +
           '<button class="btn btn-dark btn-sm" data-ord-update="' + esc(o.id) + '">' + esc(t("update_status")) + "</button></div></div>";
       }).join("") : '<p class="empty">' + esc(t("no_results")) + "</p>";
+      $("ordList").querySelectorAll("[data-ord-open]").forEach(function (card) {
+        card.addEventListener("click", function (e) {
+          var tg = e.target && e.target.closest ? e.target.closest("select,button,a") : null;
+          if (tg) return;
+          location.hash = "#/order/" + encodeURIComponent(card.dataset.ordOpen);
+        });
+      });
       $("ordList").querySelectorAll("[data-ord-update]").forEach(function (b) {
         b.addEventListener("click", async function () {
           var sel = document.querySelector('[data-ord-status="' + b.dataset.ordUpdate + '"]');
