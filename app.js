@@ -48,6 +48,7 @@ var STRINGS = {
     subtotal: "المجموع الفرعي", discount: "الخصم", shipping: "الشحن", total: "الإجمالي",
     free: "مجاني", coupon_ph: "كود الخصم", apply: "تطبيق", coupon_ok: "الكوبون اتطبق ✅",
     coupon_bad: "الكوبون مش صالح أو مش مناسب للطلب ده.", go_checkout: "إتمام الشراء",
+    have_coupon: "عندك كود خصم؟", remove_coupon: "إزالة الكوبون", coupon_login: "سجّل دخولك الأول عشان تستخدم كود الخصم",
     continue_shopping: "كمّل تسوق", remove: "حذف", clear_cart: "إفراغ السلة",
     cod: "الدفع عند الاستلام", cod_note: "هتدفع كاش لما طلبك يوصلك. مفيش أي دفع مقدم.",
     customer_info: "بيانات العميل", address_pick: "اختار عنوان أو اكتب عنوان جديد",
@@ -143,6 +144,7 @@ var STRINGS = {
     subtotal: "Subtotal", discount: "Discount", shipping: "Shipping", total: "Total",
     free: "Free", coupon_ph: "Coupon code", apply: "Apply", coupon_ok: "Coupon applied ✅",
     coupon_bad: "This coupon is invalid or doesn't apply to this order.", go_checkout: "Checkout",
+    have_coupon: "Have a discount code?", remove_coupon: "Remove coupon", coupon_login: "Please log in first to use a discount code",
     continue_shopping: "Continue Shopping", remove: "Remove", clear_cart: "Clear Cart",
     cod: "Cash on Delivery", cod_note: "You pay in cash when your order arrives. No advance payment.",
     customer_info: "Customer Info", address_pick: "Choose an address or add a new one",
@@ -266,6 +268,8 @@ try { state.lang = localStorage.getItem(LANG_KEY) || "ar"; } catch (e) {}
 try { state.cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]"); } catch (e) { state.cart = []; }
 try { state.wishlist = JSON.parse(localStorage.getItem(WISH_KEY) || "[]"); } catch (e) { state.wishlist = []; }
 try { state.session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch (e) { state.session = null; }
+var COUPON_KEY = "itlala-coupon";
+try { var _sc = JSON.parse(localStorage.getItem(COUPON_KEY) || "null"); state.coupon = (_sc && _sc.code && typeof _sc.discount_egp === "number") ? _sc : null; } catch (e) { state.coupon = null; }
 
 /* ---------- أدوات مساعدة ---------- */
 function $(id) { return document.getElementById(id); }
@@ -434,7 +438,7 @@ function fbSettings() {
     cod_enabled: true, banners: [],
     announcement_ar: "🚚 شحن لجميع المحافظات — الدفع عند الاستلام — استرجاع مجاني خلال 14 يومًا",
     announcement_en: "🚚 Shipping all over Egypt — Cash on Delivery — Free returns within 14 days",
-    support_phone: "01000000000", support_email: "support@itlala.store"
+    support_phone: "+201091296456", support_email: "support@itlala.store"
   };
 }
 async function apiRead(action, body) {
@@ -475,6 +479,7 @@ function setLang(l) { state.lang = l === "en" ? "en" : "ar"; applyLang(); render
 
 /* ---------- السلة والمفضلة (محلي + سيرفر) ---------- */
 function saveCart() { storeLocal(CART_KEY, state.cart); updateCounts(); }
+function saveCoupon() { storeLocal(COUPON_KEY, state.coupon); }
 function saveWish() { storeLocal(WISH_KEY, state.wishlist); updateCounts(); }
 function cartCount() { return state.cart.reduce(function (a, it) { return a + Number(it.qty || 0); }, 0); }
 function cartSubtotal() { return state.cart.reduce(function (a, it) { return a + Number(it.price_egp || 0) * Number(it.qty || 0); }, 0); }
@@ -639,6 +644,7 @@ function parseHash() {
 }
 function showView(name) {
   VIEWS.forEach(function (v) { var el = $("view-" + v); if (el) el.hidden = v !== name; });
+  var wa = $("waFloat"); if (wa) wa.hidden = (name === "admin");
   document.querySelectorAll(".mainnav a").forEach(function (a) {
     var href = a.getAttribute("href") || "";
     a.classList.toggle("active", href === "#" + parseHash().path || (name === "category" && href === "#/shop"));
@@ -1051,8 +1057,10 @@ function renderCart() {
   });
   h += '<p><button class="linklike" id="clearCartBtn">' + esc(t("clear_cart")) + "</button> • <a href=\"#/shop\" class=\"linklike\">" + esc(t("continue_shopping")) + "</a></p></div>";
   h += '<div class="summary"><h3>' + esc(t("order_summary")) + "</h3>" +
+    '<p class="coupon-label">' + esc(t("have_coupon")) + "</p>" +
     '<div class="coupon-row"><input type="text" id="couponInput" placeholder="' + esc(t("coupon_ph")) + '" value="' + esc(state.coupon ? state.coupon.code : "") + '" dir="ltr"><button class="btn btn-dark" id="couponBtn">' + esc(t("apply")) + "</button></div>" +
     '<p class="form-msg" id="couponMsg" role="alert">' + (state.coupon ? esc(t("coupon_ok")) + " (" + esc(state.coupon.code) + ")" : "") + "</p>" +
+    (state.coupon ? '<p><button class="linklike" id="couponRemoveBtn">' + esc(t("remove_coupon")) + "</button></p>" : "") +
     '<div class="summary-row"><span>' + esc(t("subtotal")) + "</span><strong>" + esc(fmtPrice(tt.sub)) + "</strong></div>" +
     (tt.disc ? '<div class="summary-row"><span>' + esc(t("discount")) + "</span><strong>−" + esc(fmtPrice(tt.disc)) + "</strong></div>" : "") +
     '<div class="summary-row"><span>' + esc(t("shipping")) + "</span><strong>" + (tt.ship === 0 ? esc(t("free")) : esc(fmtPrice(tt.ship))) + "</strong></div>" +
@@ -1063,29 +1071,68 @@ function renderCart() {
   box.querySelectorAll("[data-inc]").forEach(function (b) { b.addEventListener("click", function () { setCartQty(Number(b.dataset.inc), state.cart[Number(b.dataset.inc)].qty + 1); }); });
   box.querySelectorAll("[data-dec]").forEach(function (b) { b.addEventListener("click", function () { setCartQty(Number(b.dataset.dec), state.cart[Number(b.dataset.dec)].qty - 1); }); });
   box.querySelectorAll("[data-del]").forEach(function (b) { b.addEventListener("click", function () { removeFromCart(Number(b.dataset.del)); }); });
-  $("clearCartBtn").addEventListener("click", function () { state.cart = []; state.coupon = null; saveCart(); syncCartServer(); renderCart(); });
+  $("clearCartBtn").addEventListener("click", function () { state.cart = []; state.coupon = null; saveCart(); saveCoupon(); syncCartServer(); renderCart(); });
   $("couponBtn").addEventListener("click", async function () {
     var code = $("couponInput").value.trim();
     if (!code) return;
+    if (!state.user) { setMsg($("couponMsg"), t("coupon_login"), "error"); return; }
     setMsg($("couponMsg"), t("loading"));
     try {
       var d = await api("validate-coupon", { code: code, subtotal_egp: cartSubtotal() });
       if (d.valid === false) throw new Error(t("coupon_bad"));
-      state.coupon = { code: code, type: d.type, value: d.value, discount_egp: Number(d.discount_egp || 0) };
-      setMsg($("couponMsg"), t("coupon_ok"), "ok"); renderCart();
-    } catch (e) { state.coupon = null; setMsg($("couponMsg"), e.message || t("coupon_bad"), "error"); }
+      state.coupon = { code: code.toUpperCase(), type: d.type, value: d.value, discount_egp: Number(d.discount_egp || 0) };
+      saveCoupon(); renderCart();
+    } catch (e) { state.coupon = null; saveCoupon(); renderCart(); setMsg($("couponMsg"), e.message || t("coupon_bad"), "error"); }
   });
+  var crb = $("couponRemoveBtn");
+  if (crb) crb.addEventListener("click", function () { state.coupon = null; saveCoupon(); renderCart(); });
 }
 
 /* ---------- إتمام الشراء ---------- */
 var checkoutAddressId = "", checkoutNewAddress = null;
+function checkoutSummaryHTML() {
+  var tt = totals();
+  return '<h3>' + esc(t("order_summary")) + "</h3>" +
+    '<p class="coupon-label">' + esc(t("have_coupon")) + "</p>" +
+    '<div class="coupon-row"><input type="text" id="coCouponInput" placeholder="' + esc(t("coupon_ph")) + '" value="' + esc(state.coupon ? state.coupon.code : "") + '" dir="ltr"><button class="btn btn-dark" id="coCouponBtn" type="button">' + esc(t("apply")) + "</button></div>" +
+    '<p class="form-msg" id="coCouponMsg" role="alert">' + (state.coupon ? esc(t("coupon_ok")) + " (" + esc(state.coupon.code) + ")" : "") + "</p>" +
+    (state.coupon ? '<p><button class="linklike" id="coCouponRemoveBtn" type="button">' + esc(t("remove_coupon")) + "</button></p>" : "") +
+    state.cart.map(function (it) {
+      return '<div class="summary-row"><span>' + esc(L(it.name_ar, it.name_en)) + " × " + it.qty + '</span><strong>' + esc(fmtPrice(Number(it.price_egp) * Number(it.qty))) + "</strong></div>";
+    }).join("") +
+    '<div class="summary-row"><span>' + esc(t("subtotal")) + "</span><strong>" + esc(fmtPrice(tt.sub)) + "</strong></div>" +
+    (tt.disc ? '<div class="summary-row"><span>' + esc(t("discount")) + (state.coupon ? " (" + esc(state.coupon.code) + ")" : "") + "</span><strong>−" + esc(fmtPrice(tt.disc)) + "</strong></div>" : "") +
+    '<div class="summary-row"><span>' + esc(t("shipping")) + "</span><strong>" + (tt.ship === 0 ? esc(t("free")) : esc(fmtPrice(tt.ship))) + "</strong></div>" +
+    '<div class="summary-row total"><span>' + esc(t("total")) + "</span><strong>" + esc(fmtPrice(tt.total)) + "</strong></div>";
+}
+function refreshCheckoutSummary() {
+  var s = $("coSummary"); if (!s) return;
+  s.innerHTML = checkoutSummaryHTML();
+  bindCheckoutCoupon();
+}
+function bindCheckoutCoupon() {
+  var b = $("coCouponBtn"); if (!b) return;
+  b.addEventListener("click", async function () {
+    var code = $("coCouponInput").value.trim();
+    if (!code) return;
+    if (!state.user) { setMsg($("coCouponMsg"), t("coupon_login"), "error"); return; }
+    setMsg($("coCouponMsg"), t("loading"));
+    try {
+      var d = await api("validate-coupon", { code: code, subtotal_egp: cartSubtotal() });
+      if (d.valid === false) throw new Error(t("coupon_bad"));
+      state.coupon = { code: code.toUpperCase(), type: d.type, value: d.value, discount_egp: Number(d.discount_egp || 0) };
+      saveCoupon(); refreshCheckoutSummary();
+    } catch (e) { state.coupon = null; saveCoupon(); refreshCheckoutSummary(); setMsg($("coCouponMsg"), e.message || t("coupon_bad"), "error"); }
+  });
+  var rb = $("coCouponRemoveBtn");
+  if (rb) rb.addEventListener("click", function () { state.coupon = null; saveCoupon(); refreshCheckoutSummary(); });
+}
 async function renderCheckout() {
   var box = $("checkoutContent");
   if (!state.cart.length) {
     box.innerHTML = '<p class="empty">' + esc(t("cart_empty")) + '</p><p style="text-align:center"><a href="#/shop" class="btn btn-dark">' + esc(t("cart_empty_cta")) + "</a></p>";
     return;
   }
-  var tt = totals();
   var addresses = [];
   if (state.user) {
     try { var d = await api("list-addresses"); addresses = d.addresses || d || []; } catch (e) { addresses = []; }
@@ -1116,15 +1163,9 @@ async function renderCheckout() {
     '<p class="muted small">' + esc(t("cod_note")) + "</p></div>" +
     '<button class="btn btn-dark btn-block btn-lg" type="submit" style="margin-top:1rem">' + esc(t("place_order")) + "</button>" +
     '<p class="form-msg" id="coMsg" role="alert"></p></form></div>' +
-    '<div class="summary"><h3>' + esc(t("order_summary")) + "</h3>" +
-    state.cart.map(function (it) {
-      return '<div class="summary-row"><span>' + esc(L(it.name_ar, it.name_en)) + " × " + it.qty + '</span><strong>' + esc(fmtPrice(Number(it.price_egp) * Number(it.qty))) + "</strong></div>";
-    }).join("") +
-    '<div class="summary-row"><span>' + esc(t("subtotal")) + "</span><strong>" + esc(fmtPrice(tt.sub)) + "</strong></div>" +
-    (tt.disc ? '<div class="summary-row"><span>' + esc(t("discount")) + "</span><strong>−" + esc(fmtPrice(tt.disc)) + "</strong></div>" : "") +
-    '<div class="summary-row"><span>' + esc(t("shipping")) + "</span><strong>" + (tt.ship === 0 ? esc(t("free")) : esc(fmtPrice(tt.ship))) + "</strong></div>" +
-    '<div class="summary-row total"><span>' + esc(t("total")) + "</span><strong>" + esc(fmtPrice(tt.total)) + "</strong></div></div></div>";
+    '<div class="summary" id="coSummary">' + checkoutSummaryHTML() + "</div></div>";
   box.innerHTML = h;
+  bindCheckoutCoupon();
   var sel = $("coAddressSel"), newAddr = $("coNewAddr");
   if (sel) {
     newAddr.style.display = sel.value === "" ? "block" : "none";
@@ -1154,7 +1195,7 @@ async function renderCheckout() {
       var d = await api("place-order", payload);
       var order = d.order || d;
       state.lastOrder = order;
-      state.cart = []; state.coupon = null; saveCart(); syncCartServer();
+      state.cart = []; state.coupon = null; saveCart(); saveCoupon(); syncCartServer();
       setMsg($("coMsg"), t("order_ok") + (order.order_number || ""), "ok");
       toast(t("order_ok") + (order.order_number || ""));
       if (order.order_number) location.hash = "#/order/" + encodeURIComponent(order.order_number);
@@ -1808,6 +1849,18 @@ async function renderAdminSettings(box) {
 }
 
 /* ---------- إعدادات عامة ---------- */
+var WA_DEFAULT_NUMBER = "201091296456";
+var WA_DEFAULT_MSG = "مرحبًا، لدي استفسار بخصوص منتجات المتجر.";
+function waNumber() {
+  var raw = (state.settings && state.settings.support_phone) || WA_DEFAULT_NUMBER;
+  var digits = String(raw).replace(/[^0-9]/g, "");
+  if (digits.charAt(0) === "0") digits = "20" + digits.slice(1);
+  return digits || WA_DEFAULT_NUMBER;
+}
+function updateWaLink() {
+  var a = $("waFloat"); if (!a) return;
+  a.href = "https://wa.me/" + waNumber() + "?text=" + encodeURIComponent(WA_DEFAULT_MSG);
+}
 async function loadSettingsPublic() {
   try {
     var d = await apiRead("get-settings-public");
@@ -1817,6 +1870,7 @@ async function loadSettingsPublic() {
     var ce = $("contactEmail"); if (ce && d.support_email) ce.textContent = d.support_email;
     var cp = $("contactPhone"); if (cp && d.support_phone) cp.textContent = d.support_phone;
   } catch (e) { state.settings = fbSettings(); }
+  updateWaLink();
 }
 async function loadCategories() {
   try { var d = await apiRead("list-categories"); state.categories = d.categories || []; }
