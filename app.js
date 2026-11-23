@@ -76,6 +76,7 @@ var STRINGS = {
     status_delivered: "تم التوصيل", status_cancelled: "ملغي",
     pay_pending: "الدفع معلّق", pay_paid: "مدفوع",
     view_order: "عرض الطلب", cancel_order: "إلغاء الطلب", confirm_cancel: "متأكد إنك عايز تلغي الطلب ده؟",
+    tap_again_cancel: "اضغط مرة تانية للتأكيد",
     write_review: "اكتب تقييمك", review_title_ph: "عنوان التقييم (اختياري)", review_body_ph: "رأيك في المنتج…",
     send_review: "ابعت التقييم", rate: "التقييم (1–5)",
     my_orders_empty: "لسه مفيش طلبات — أول طلب ليك مستنيك.",
@@ -172,6 +173,7 @@ var STRINGS = {
     status_delivered: "Delivered", status_cancelled: "Cancelled",
     pay_pending: "Payment pending", pay_paid: "Paid",
     view_order: "View Order", cancel_order: "Cancel Order", confirm_cancel: "Are you sure you want to cancel this order?",
+    tap_again_cancel: "Tap again to confirm",
     write_review: "Write a Review", review_title_ph: "Review title (optional)", review_body_ph: "Your opinion about the product…",
     send_review: "Send Review", rate: "Rating (1–5)",
     my_orders_empty: "No orders yet — your first order is waiting.",
@@ -1418,9 +1420,16 @@ async function renderOrders() {
   }).join("");
   box.querySelectorAll("[data-cancel-order]").forEach(function (b) {
     b.addEventListener("click", async function () {
-      if (!confirm(t("confirm_cancel"))) return;
+      if (!b.dataset.armed) {
+        b.dataset.armed = "1";
+        b.dataset.origText = b.textContent;
+        b.textContent = t("tap_again_cancel");
+        setTimeout(function () { if (b.isConnected) { delete b.dataset.armed; b.textContent = b.dataset.origText || t("cancel_order"); } }, 5000);
+        return;
+      }
+      b.disabled = true;
       try { await api("cancel-order", { order_id: b.dataset.cancelOrder }); toast(t("order_cancelled")); renderOrders(); }
-      catch (err) { toast(err.message || t("err_generic")); }
+      catch (err) { toast(err.message || t("err_generic")); b.disabled = false; delete b.dataset.armed; b.textContent = b.dataset.origText || t("cancel_order"); }
     });
   });
 }
@@ -1494,9 +1503,16 @@ async function renderOrderDetails(number) {
   });
   var cb = $("ordDetCancel");
   if (cb) cb.addEventListener("click", async function () {
-    if (!confirm(t("confirm_cancel"))) return;
+    if (!cb.dataset.armed) {
+      cb.dataset.armed = "1";
+      cb.dataset.origText = cb.textContent;
+      cb.textContent = t("tap_again_cancel");
+      setTimeout(function () { if (cb.isConnected) { delete cb.dataset.armed; cb.textContent = cb.dataset.origText || t("cancel_order"); } }, 5000);
+      return;
+    }
+    cb.disabled = true;
     try { await api("cancel-order", { order_id: o.id }); toast(t("order_cancelled")); renderOrderDetails(number); }
-    catch (err) { toast(err.message || t("err_generic")); }
+    catch (err) { toast(err.message || t("err_generic")); cb.disabled = false; delete cb.dataset.armed; cb.textContent = cb.dataset.origText || t("cancel_order"); }
   });
 }
 async function renderTracking(number) {
